@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <LangVersion>latest</LangVersion>
+    <ApplicationIcon>Logo.ico</ApplicationIcon>
+    <StartupObject>WinFormsApp1.Program</StartupObject>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Content\bin\Windows\Content\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Logo.ico" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="MonoGame.Forms.DX" Version="3.2.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+
+  </ItemGroup>
+
+</Project>
