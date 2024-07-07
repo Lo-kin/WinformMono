@@ -102,7 +102,7 @@ namespace Cyanen
 
             if (DisposeAfterTiggerCount != 0)
             {
-                Graphic.SoundEffectPlayList.Add(Id);
+                //Graphic.SoundEffectPlayList.Add(Id);
             }
 
             return p;

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/20230914141311.jpg</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/ba.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/dirt.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/grass.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/ground.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/guide.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/MAIN.ogg</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/monogame-logo.png</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/untitled.wav</File>
+    <File>C:/Users/Locyan/source/repos/Project2/Content/water.png</File>
+  </SourceFiles>
+  <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>

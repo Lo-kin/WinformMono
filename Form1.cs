@@ -4,7 +4,7 @@ namespace WinFormsApp1
 {
     public partial class Form1 : Form
     {
-        string[] args = null;
+        string[] args = [];
         public static bool ConsoleEnable;
         public Form1()
         {
@@ -95,11 +95,11 @@ namespace WinFormsApp1
         {
             if (e.Button == MouseButtons.Left)
             {
-                DataBase.test = true;
+                DataBase.mouseData.IsLeftPress = true;
             }
             if (e.Button == MouseButtons.Right)
             {
-                DataBase.test1 = true;
+                DataBase.mouseData.IsRightPress = true;
             }
         }
 
@@ -107,19 +107,18 @@ namespace WinFormsApp1
         {
             if (e.Button == MouseButtons.Left)
             {
-                DataBase.test = false;
+                DataBase.mouseData.IsLeftPress = false;
             }
             if (e.Button == MouseButtons.Right)
             {
-                DataBase.test1 = false;
+                DataBase.mouseData.IsRightPress = false;
             }
         }
 
         private void sampleControl_MouseMove(object sender, MouseEventArgs e)
         {
-            DataBase.MouseMoveOffset = new Microsoft.Xna.Framework.Point((int)e.X, (int)e.Y) - DataBase.MousePrevPosition;
-            DataBase.MousePosition = new Microsoft.Xna.Framework.Point((int)e.X, (int)e.Y);
-            DataBase.MousePrevPosition = new Microsoft.Xna.Framework.Point((int)e.X, (int)e.Y);
+            DataBase.mouseData.Offset = new Microsoft.Xna.Framework.Vector2(e.X, e.Y) - DataBase.mouseData.Position;
+            DataBase.mouseData.Position = new Microsoft.Xna.Framework.Vector2(e.X, e.Y);
         }
     }
 

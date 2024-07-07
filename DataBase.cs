@@ -1,11 +1,11 @@
-﻿using Cyanen;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Xna.Framework;
+using Editor.Controls;
 
 namespace Cyanen
 {
@@ -13,34 +13,35 @@ namespace Cyanen
     static class DataBase
     {
         public static Random RandomBase = new Random();
-        public static bool test;
-        public static bool test1;
-        public static Microsoft.Xna.Framework.Point MouseMoveOffset = new Microsoft.Xna.Framework.Point(0, 0);
-        public static Microsoft.Xna.Framework.Point MousePosition = new Microsoft.Xna.Framework.Point(0, 0);
-        public static Rectangle[] RectCrashBox = new Rectangle[25565];
-        public static List<int> RectCrashBoxId = new List<int>();
+        public static Dictionary<int, Player> Players = new Dictionary<int, Player>();
         public static Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
         public static Dictionary<int, Camera> Cameras = new Dictionary<int, Camera>();
+        public static int PlayerCount = 25565;
+        public static int EntityCount = 25565;
+        public static int CameraCount = 25565;
+        public static int ScreenCameraId = 1;//决定屏幕使用哪一个摄像机
+        public static int MainEntityId = 1;//决定操纵哪一个实体
+
         public static Dictionary<int, string> TextrueBase32 = new Dictionary<int, string>();
         public static Dictionary<int, string> FileSource = new Dictionary<int, string>();
+
+        public static MouseData mouseData = new MouseData();
         public static Dictionary<Keys, bool> IsKeyDown = new Dictionary<Keys, bool>();
         public static Dictionary<Keys, object[]> KeyOpration = new Dictionary<Keys, object[]>();
         public static string[] KeyOprateID = new string[] { "Move", "ShutDown" , "Menu"};
-        public static Microsoft.Xna.Framework.Point MousePrevPosition = new Microsoft.Xna.Framework.Point(0, 0);
-        public static Keys[] RegisterKeys = new Keys[0];
-        public static int EntityCount = 25565;
-        public static int CameraCount = 25565;
+        public static Keys[] RegisterKeys = [];
+
         public static bool IsInit = false;
 
         static DataBase()
         {
-            var DefaultCamera = new Camera(0);
-            DefaultCamera.Description = "A Prepare Entity For Camera";
-            Register(DefaultCamera.Id, DefaultCamera);
-            var TestEt = new Entity(1, "Test");
-            TestEt.Position = new Vector2(32 + 1000, 32 + 1000);
-            TestEt.Description = "A Prepare Entity For Test";
-            Register(TestEt.Id, TestEt);
+            mouseData.Position = mouseData.Offset = new Vector2(0, 0);
+            mouseData.IsLeftPress = mouseData.IsRightPress = false;
+
+            Camera DefaultCam = new Camera(1, new Vector2(0, 0)) { };
+            Player TestPlayer = new Player() {Description = "Test Player" };
+            ScreenCameraId = TestPlayer.SoloId;
+            MainEntityId = TestPlayer.BodyId;
 
             Keys[] keys = new Keys[] { Keys.W, Keys.S, Keys.D, Keys.A, Keys.Escape };
             RegisterKeys = keys;
@@ -69,60 +70,83 @@ namespace Cyanen
             }
         }
 
-        static public void AddRectCrash(int id, Rectangle rect)
-        {
-            RectCrashBoxId.Add(id);
-            RectCrashBox[RectCrashBoxId.Count - 1] = rect;
-        }
-
-        public static bool Register(int id, Entity Content)
+        public static int Register(int id, Entity Content)
         {
             if (Entities.Keys.Contains(id))
             {
-                return false;
+                return -1;
             }
             else if (id == 0)
             {
-                int Num = RandomBase.Next(0, EntityCount + 1);
+                int Num = RandomBase.Next(1, EntityCount + 1);
                 while (true)
                 {
                     if (Entities.Keys.Contains(Num))
                     {
-                        Num = RandomBase.Next(0, EntityCount + 1);
+                        Num = RandomBase.Next(1, EntityCount + 1);
                     }
                     else
                     {
                         if (Content.SpiritStat == false)
                         {
-                            AddRectCrash(Content.Id, Content.RectCrashBox);
+                            //AddRectCrash(Content.Id, Content.RectCrashBox);
                         }
                         Entities.Add(Num, Content);
                         break;
                     }
                 }
-                return true;
+                return Num;
             }
             else
             {
                 Entities.Add(id, Content);
-                return true;
+                return 0;
             }
         }
 
-        public static bool Register(int id, Camera Content)
+        public static int Register(int id, Player Content)
         {
-            if (Cameras.Keys.Contains(id))
+            if (Players.Keys.Contains(id))
             {
-                return false;
+                return -1;
             }
             else if (id == 0)
             {
-                int Num = RandomBase.Next(0, CameraCount + 1);
+                int Num = RandomBase.Next(1, PlayerCount + 1);
+                while (true)
+                {
+                    if (Players.Keys.Contains(Num))
+                    {
+                        Num = RandomBase.Next(1, PlayerCount + 1);
+                    }
+                    else
+                    {
+                        Players.Add(Num, Content);
+                        return Num;
+                    }
+                }
+            }
+            else
+            {
+                Players.Add(id, Content);
+                return 0;
+            }
+        }
+
+        public static int Register(int id, Camera Content)
+        {
+            if (Cameras.Keys.Contains(id))
+            {
+                return -1;
+            }
+            else if (id == 0)
+            {
+                int Num = RandomBase.Next(1, CameraCount + 1);
                 while (true)
                 {
                     if (Cameras.Keys.Contains(Num))
                     {
-                        Num = RandomBase.Next(0, CameraCount + 1);
+                        Num = RandomBase.Next(1, CameraCount + 1);
                     }
                     else
                     {
@@ -130,19 +154,27 @@ namespace Cyanen
                         break;
                     }
                 }
-                return true;
+                return Num;
             }
             else
             {
                 Cameras.Add(id, Content);
-                return true;
+                return 0;
             }
         }
 
         static public void DeleteCrashBox(int Id)
         {
             
-            RectCrashBox[RectCrashBoxId.IndexOf(Id)] = null;
+            
         }
+    }
+
+    public struct MouseData
+    {
+        public Vector2 Position;
+        public Vector2 Offset;
+        public bool IsRightPress;
+        public bool IsLeftPress;
     }
 }

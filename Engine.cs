@@ -10,6 +10,8 @@ using System.Xml.Linq;
 using System.Linq;
 using Editor.Controls;
 using System.Windows;
+using MonoGame.Forms.NET.Components;
+using WinFormsApp1;
 
 namespace Cyanen
 {
@@ -24,8 +26,8 @@ namespace Cyanen
         static private int SubGameTick = 5;
         static private int GameTimer = 0;
         static public bool TerrGeneStat;
-        static private int WindowWidth = 1280;
-        static private int WindowHeight = 720;
+        static internal int WindowWidth = 1280;
+        static internal int WindowHeight = 720;
         static public bool IsEngineStarted = false;
         static public GameTime gameTime;
 
@@ -37,10 +39,11 @@ namespace Cyanen
         static private Thread IC;
 
         public static ILogger logger;
+        public static int[] FormSize = [0, 0];
+
 
         public static void Init(/*string[] args*/)
         {
-            p = new Player();
             //有两个信息流线程,一个用于日志输出,另一个用作监听用户输入
             using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddSimpleConsole(options =>
             {
@@ -96,7 +99,6 @@ namespace Cyanen
                 else if (command.StartsWith("move"))
                 {
                     logger.LogInformation("Camera Move : " + command);
-                    Graphic.CameraPostion += new Vector2(10, 10);
                 }
                 else
                 {
@@ -129,7 +131,7 @@ namespace Cyanen
 
         public static Mutex PaintMutlock = new Mutex();
                                                   //区块长与宽，长宽包含块数 物体长与宽 最后是区块像素长与宽
-        private static int[] GeneProperties = new int[7] {3 , 16 , 16 , 64 , 64 , 1 , 1};
+        private static int[] GeneProperties = new int[7] {3 , 16 , 16 , 16 , 16 , 1 , 1};
         private static Vector3 GenePosition = new Vector3(0 , 0 , 0);//生成的起点，即生成矩形的中央
         public float[][,] TerrProperties { get; set; }
         //一个核心参数与下者的数据一致，但是为了方便理解
@@ -298,7 +300,7 @@ namespace Cyanen
         public static bool IsInitGraphic = true;
 
         public static List<Entity> TestAddEnt { get; set; }
-        public static List<bool> TestAddEntStat { get; set; }
+        public static List<int> TestAddEntStat { get; set; }
 
         private static void Core()
         { 
@@ -329,7 +331,7 @@ namespace Cyanen
             var ChunkHeightpx = GeneProperties[6];
             bool IsReportGraphicStart = false;
             TestAddEnt = new List<Entity>();
-            TestAddEntStat = new List<bool>();
+            TestAddEntStat = new List<int>();
 
             Random random = new Random();
 
@@ -383,11 +385,7 @@ namespace Cyanen
                         {
                             if (keyOprate[0] as string == "Move")
                             {
-                                if (CheckCrashBox() == true)
-                                {
-                                    DataBase.Entities[1].Position += (Vector2)keyOprate[1];
-                                    Graphic.CameraPostion += (Vector2)keyOprate[1];
-                                }
+                                DataBase.Entities[DataBase.MainEntityId].PreMove += (Vector2)keyOprate[1];
                             }
                             else if (keyOprate[0] as string == "ShutDown")
                             {
@@ -404,43 +402,26 @@ namespace Cyanen
                     }
                 }
 
-                bool bullet = false;
-                Vector2 testroad = new Vector2();
                 //鼠标事件处理
-                double aa = 0;
-                if (Graphic.Cameras[0] != null)
+                if (Graphic.Camera2Ds[0] != null)
                 {
-                    var a = DataBase.MousePosition.X - 400;
-                    var b = DataBase.MousePosition.Y - 240;
-                    var d = new Vector2(a, b);
-                    d.Normalize();
-                    testroad = d;
-                    if (DataBase.test == true)
+                    if (DataBase.mouseData.IsLeftPress == true)
                     {
-                        Graphic.Cameras[0].Position += new Vector2(d.X * 5, d.Y * 5);
+                        DataBase.Cameras[DataBase.ScreenCameraId].UnfowllowEntity();
+                        float xPos = DataBase.mouseData.Position.X - (WindowWidth / 2);
+                        float yPos = DataBase.mouseData.Position.Y - (WindowHeight / 2);
+                        var BaseVector = new Vector2(xPos, yPos);
+                        BaseVector.Normalize();
+                        Graphic.Camera2Ds[0].Position += BaseVector * 3;
+                        DataBase.Cameras[DataBase.ScreenCameraId].Position = Graphic.Camera2Ds[0].Position;
                     }
                     else
                     {
-                        
-                        //相对于后一个向量顺时针为正角
-                        //逆时针为负角
-                        double per = /*-((Vector.angleBetween(new Vector(d.X, d.Y), new Vector(0, 1)) ) / 180 )*/ 1*Math.PI;//弧度制换角度制
-                        Graphic.test = per;
-                        aa = per;
-                        if (!Graphic.DynamicRenderObj[0].Equals(null))
-                        {
-                            Graphic.Cameras[0].Position = Graphic.DynamicRenderObj[0].RenderPosition + new Vector2(-400 + 32, -240 + 32);
-                        }
-                        
-                    }
-                    if (DataBase.test1 == true)
-                    {
-                        Bullet bullet1 = new Bullet();
-
+                        DataBase.Cameras[DataBase.ScreenCameraId].FollowEntity(DataBase.Cameras[DataBase.ScreenCameraId].FollowEntityId);
                     }
                 }
 
-                //摄像机事件处理
+                //摄像机事件处理wwww
                 foreach (int CameraId in DataBase.Cameras.Keys)
                 {
                     Camera OprateCamera = DataBase.Cameras[CameraId];
@@ -449,83 +430,47 @@ namespace Cyanen
                         if (OprateCamera.IsFollow == true)
                         {
                             DataBase.Cameras[CameraId].UpdatePosition();
+
+                            if (Graphic.Camera2Ds[0] != null && DataBase.mouseData.IsLeftPress != true)
+                            {
+                                Graphic.Camera2Ds[0].Position = DataBase.Cameras[DataBase.ScreenCameraId].Position;
+                            }
                         }
                     }
                 }
+
+
+
 
                 //处理实体事件
-                Vector2[] tmp= new Vector2[DataBase.Entities.Count];
-                RenderProrerty[] tmg = new RenderProrerty[DataBase.Entities.Count];
-                Entity tmp1 = DataBase.Entities[1];
-                int CountEnt = -1;
-                foreach (Entity OprateEntity in DataBase.Entities.Values)
+                int entityCount = -1;
+                foreach (Entity entity in DataBase.Entities.Values)
                 {
-                    CountEnt++;
-                    OprateEntity.Position.X -= 0.005f * (OprateEntity.Position.X - tmp1.Position.X);
-                    OprateEntity.Position.Y -= 0.005f * (OprateEntity.Position.Y - tmp1.Position.Y);
-
-                    if (DataBase.Entities.Count <= tmp.Length)
+                    entityCount++;
+                    RenderProrerty[] EntityRP = new RenderProrerty[DataBase.Entities.Count()];
+                    if (entity != null)
                     {
-                        tmp[CountEnt] = OprateEntity.Position;
-                    }
-
-
-
-                    if (OprateEntity != null)
-                    {
-
-                    }
-
-                    Vector2 t = OprateEntity.Position + new Vector2(0, 0);
-                    int cx = (int)Math.Floor(t.X / GeneProperties[5]);
-                    int cy = (int)Math.Floor(t.Y / GeneProperties[6]);
-                    int x = (int)Math.Floor((t.X % (GeneProperties[5] * cx)) / GeneProperties[3]);
-                    int y = (int)Math.Floor((t.Y % (GeneProperties[6] * cy)) / GeneProperties[4]);
-                    if (cx == 0)
-                    {
-                        x = (int)Math.Floor(t.X / GeneProperties[3]);
-                    }
-                    if (cy == 0)
-                    {
-                        y = (int)Math.Floor(t.Y / GeneProperties[4]);
-                    }
-                    if (cx < 0 || cy < 0 || x < 0 || y < 0)
-                    {
-
-                    }
-                    else
-                    {
-                        int tmpd = p.Money;
-                        //CyanObjOutput[cx, cy][x, y].EventTrigger(p);
-                        if (p.Money != tmpd)
+                        if (CheckCrashBox())
                         {
-
+                            entity.Position += entity.PreMove;
+                            entity.PreMove = new Vector2();
+                            EntityRP[entityCount] = new RenderProrerty()
+                            {
+                                RenderPosition = entity.Position,
+                                RenderSize = new Vector2(16,16),
+                                Texture2DId = 65534,
+                            };
                         }
+
                     }
-                    
-                    tmg[CountEnt] = new RenderProrerty()
-                    {
-                        RenderPosition = OprateEntity.Position,
-                        Texture2DId = 65534,
-                        RenderQuaternion = (float)aa,
-                    };
-                    
-
+                    Graphic.DynamicRenderObj = EntityRP;
                 }
-                for (int i = 0; i < DataBase.Entities.Count; i++)
-                {
 
-                }
-                Graphic.DynamicRenderObj = tmg;
-                if (Graphic.Cameras[0] != null)
-                {
-
-                }
+                //Graphic.DynamicRenderObj = tmg;
                 Thread.Sleep(SubGameTick);
             }
 
         }
-        public static Player p = new Player();
 
         static public void ShutDown(string ExitMsg)
         {
@@ -538,82 +483,48 @@ namespace Cyanen
         }
     }
 
-
-    public class Rectangle
-    {
-        public Vector2 Position { get; set; } = new Vector2();
-        public Vector2 Size { get; set; } = new Vector2();
-
-        public void AddPosition(Vector2 position)
-        {
-            Position += Position;
-        }
-
-        public void AddSize(Vector2 size)
-        {
-            Size += size;
-        }
-        public Rectangle(Vector2 position , Vector2 size)
-        { 
-            Position = position;
-            Size = size;
-        }
-
-    }
-
     public class Camera
     {
-        //这个位置指的是一个点
-        private Random rad = new Random();
         public Vector2 Position { get; set; } = new Vector2();
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int FollowEntityId;
+        public int FollowEntityId { get; set; }
         public bool IsFollow;
         public float Speed { get; set; }
         public Camera(int id)
         {
             Position = new Vector2();
             Id = id;
-            if (Id == 0)
+            int StatCode = DataBase.Register(Id, this);
+            if (StatCode == -1)
             {
-                int Num = rad.Next(0, DataBase.CameraCount + 1);
-                while (true)
-                {
-                    if (DataBase.Cameras.Keys.Contains(Num))
-                    {
-                        Num = rad.Next(0, DataBase.CameraCount + 1);
-                    }
-                    else
-                    {
-                        Id = Num; break;
-                    }
-                }
+                Id = DataBase.Register(0, this);
             }
-            DataBase.Register(id,this);
+            else if (StatCode > 0)
+            {
+                Id = StatCode;
+            }
         }
 
         public Camera(int id , Vector2 Pos)
         {
             Position = Pos;
             Id = id;
-            if (Id == 0)
+            int StatCode = DataBase.Register(Id, this);
+            if (StatCode == -1)
             {
-                int Num = rad.Next(0, DataBase.CameraCount + 1);
-                while (true)
-                {
-                    if (DataBase.Cameras.Keys.Contains(Num))
-                    {
-                        Num = rad.Next(0, DataBase.CameraCount + 1);
-                    }
-                    else
-                    {
-                        Id = Num; break;
-                    }
-                }
+                Id = DataBase.Register(0, this);
             }
-            DataBase.Register(id, this);
+            else if (StatCode > 0)
+            {
+                Id = StatCode;
+            }
+        }
+
+        public int GetId()
+        {
+            return Id;
         }
 
         public void FollowEntity(int id)
@@ -630,19 +541,21 @@ namespace Cyanen
 
         public void UpdatePosition()
         {
-            Position = DataBase.Entities[FollowEntityId].Position;
+            //Style 1:直接移动到目标
+            //Position = DataBase.Entities[FollowEntityId].Position;
+            //Style 2:平滑移动
+            Position -= (Position - DataBase.Entities[FollowEntityId].Position) * 0.06f ;
         }
     }
     
     public class Entity
     {
-        private Random rad = new Random();
         public int Id;
         public string Name = "Default";
         public string Description;
         public float Speed = 20;//unit px
         
-        public int TextrueID = 1;
+        public int TextrueID = 65534;
         public bool IsUsing = true;
         public Vector2 Size = new Vector2(32 , 32);
         public Vector2 TransSize = new Vector2();
@@ -650,57 +563,37 @@ namespace Cyanen
         public Vector2 Rotation = new Vector2();
         public Vector2 Crashbox = new Vector2(32 , 32);
         public Vector2 ChunkPos = new Vector2();
-        public Vector2 BlockPos = new Vector2();//与前一个position不同，这个表示的是相对位置
+        public Vector2 BlockPos = new Vector2();
         public Vector2 PreMove = new Vector2();
-        public float[] PreOprate = new float[5];//前端发来想要的操作数据，在core中判断是否可行  0X,1Y,预留
         public bool SpiritStat { get; set; } = false;
-        public Rectangle RectCrashBox;
-
+        public int code;
         public Entity(int id , string name)
         {
             Id = id;
-            if (Id == 0)
-            {
-                int Num = rad.Next(1, DataBase.EntityCount + 1);
-                while (true)
-                {
-                    if (DataBase.Entities.Keys.Contains(Num))
-                    {
-                        Num = rad.Next(1, DataBase.EntityCount + 1);
-                    }
-                    else
-                    {
-                        Id = Num;
-                        break;
-                    }
-                }
-            }
             Name = name;
-            RectCrashBox = new Rectangle(Position, Crashbox);
-            DataBase.Register(Id, this);
+            int StatCode = DataBase.Register(Id, this);
+            if (StatCode == -1)
+            {
+                Id = DataBase.Register(0, this);
+            }
+            else if (StatCode > 0)
+            {
+                Id = StatCode;
+            }
         }
 
         public Entity(int id)
         {
             Id = id;
-            if (Id == 0)
+            int StatCode = DataBase.Register(Id, this);
+            if (StatCode == -1)
             {
-                int Num = rad.Next(0, DataBase.EntityCount + 1);
-                while (true)
-                {
-                    if (DataBase.Entities.Keys.Contains(Num))
-                    {
-                        Num = rad.Next(0, DataBase.EntityCount + 1);
-                    }
-                    else
-                    {
-                        Id = Num; break;
-                    }
-                }
-
+                Id = DataBase.Register(0, this);
             }
-            RectCrashBox = new Rectangle(Position, Crashbox);
-            DataBase.Register(id, this);
+            else if (StatCode > 0)
+            {
+                Id = StatCode;
+            }
         }
 
         public void Spirit()
@@ -713,7 +606,6 @@ namespace Cyanen
         public void UnSpirit()
         {
             Crashbox = Vector2.Zero;
-            DataBase.AddRectCrash(Id, RectCrashBox);
             SpiritStat = true;
         }
     }
@@ -797,6 +689,11 @@ namespace Cyanen
                 { 2, new object[] { 2 , "wall" , "Wall"  , false , "Tight" , 0}}
             };
         }
+    }
+
+    class GraphicOpration
+    {
+
     }
 
 }

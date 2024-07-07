@@ -1,4 +1,6 @@
-﻿namespace WinFormsApp1
+﻿using Cyanen;
+
+namespace WinFormsApp1
 {
     partial class Form1
     {
@@ -30,6 +32,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             sampleControl = new Editor.Controls.Graphic();
+            button1 = new Button();
             SuspendLayout();
             // 
             // sampleControl
@@ -40,7 +43,7 @@
             sampleControl.Location = new Point(0, 0);
             sampleControl.MouseHoverUpdatesOnly = false;
             sampleControl.Name = "sampleControl";
-            sampleControl.Size = new Size(800, 600);
+            sampleControl.Size = new Size(Cyan.WindowWidth, Cyan.WindowHeight);
             sampleControl.TabIndex = 0;
             sampleControl.Text = "Sample Control";
             sampleControl.KeyDown += sampleControl_KeyDown;
@@ -49,11 +52,21 @@
             sampleControl.MouseMove += sampleControl_MouseMove;
             sampleControl.MouseUp += sampleControl_MouseUp;
             // 
+            // button1
+            // 
+            button1.Location = new Point(0, 504);
+            button1.Name = "button1";
+            button1.Size = new Size(322, 96);
+            button1.TabIndex = 1;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 600);
+            ClientSize = new Size(Cyan.WindowWidth, Cyan.WindowHeight);
+            Controls.Add(button1);
             Controls.Add(sampleControl);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
@@ -65,5 +78,6 @@
         #endregion
 
         private Editor.Controls.Graphic sampleControl;
+        private Button button1;
     }
 }
