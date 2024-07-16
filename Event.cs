@@ -8,7 +8,7 @@ using Editor.Controls;
 
 namespace Cyanen
 {
-    public class Effect
+    public class Event
     {
         public int BindIndex;
         public string EventName;
@@ -17,13 +17,14 @@ namespace Cyanen
         public string EventSource;
         public string EventTarget;
         public int TriggerSound = 1;
+        public bool Visibility { get; set; } = true;
 
         public int DisposeAfterTiggerCount = -1;
-        public bool DisposeTiggerBool = false;
+        public bool IsDisposeTigger = false;
 
         public List<Player> PlayerList;
 
-        public Effect() 
+        public Event() 
         {
 
         }
@@ -40,16 +41,16 @@ namespace Cyanen
             }
             else if (DisposeAfterTiggerCount == 0)
             {
-                DisposeTiggerBool = true;
+                IsDisposeTigger = true;
             }
 
         }
 
         public string Name { get; set; }
 
-        public virtual Player Trigger(Player p , int chg) 
+        public virtual bool Trigger(int pId , int chg) 
         {
-            return p;
+            return true;
         }
 
         public void Dispose() 
@@ -58,19 +59,20 @@ namespace Cyanen
         }
     }
 
-    class ChangeMoney : Effect
+    class ChangeMoney : Event
     {
         int TotalCount = 5;
         int ChangeCount = 1;
-        public override Player Trigger(Player p , int Changecount)
+         
+        public override bool Trigger(int PlayerId , int Changecount)
         {
-            //base.TiggerPorperty();
+            TiggerPorperty();
 
-            //if (DisposeTiggerBool == false)
-            //{
+            if (IsDisposeTigger == false)
+            {
                 if (TotalCount < ChangeCount || TotalCount == 0)
                 {
-                    return p;
+                    return true;
                 }
                 else if (TotalCount <= -1)
                 {
@@ -79,10 +81,11 @@ namespace Cyanen
                 else
                 {
                     TotalCount -= Changecount;
+                    DataBase.Players[PlayerId].Money += Changecount;
                 }
-                p.Money += Changecount;
-            //}
-            return p;
+            
+            }
+            return true;
         }
 
         public void Trigger(Player p) 
@@ -92,11 +95,22 @@ namespace Cyanen
 
     }
 
-    class PlaySound : Effect
+    class ChangeSpeed :Event
+    {
+        int SpeedCount = 0;
+
+        public override bool Trigger(int pId, int chg)
+        {
+            
+            return true;
+        }
+    }
+
+    class PlaySound : Event
     {
         int SoundId = 1;
         int DisposeAfterTiggerCount = 1;
-        public override Player Trigger(Player p , int Id)
+        public override bool Trigger(int PlayerId , int Id)
         {
             base.TiggerPorperty();
 
@@ -105,7 +119,7 @@ namespace Cyanen
                 //Graphic.SoundEffectPlayList.Add(Id);
             }
 
-            return p;
+            return true;
         }
     }
 }

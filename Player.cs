@@ -13,7 +13,7 @@ namespace Cyanen
         public string Description { get; set; } = "None";
         public int Money = 0;
 
-        public Effect[] Effects { get; set; }
+        public List<Event> Events { get; set; }
         public int BodyId { get; set; }
         public int SoloId { get; set; }
 

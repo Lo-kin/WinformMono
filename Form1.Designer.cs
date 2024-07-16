@@ -43,7 +43,7 @@ namespace WinFormsApp1
             sampleControl.Location = new Point(0, 0);
             sampleControl.MouseHoverUpdatesOnly = false;
             sampleControl.Name = "sampleControl";
-            sampleControl.Size = new Size(Cyan.WindowWidth, Cyan.WindowHeight);
+            sampleControl.Size = new Size(GameProperty.WindowWidth, GameProperty.WindowHeight);
             sampleControl.TabIndex = 0;
             sampleControl.Text = "Sample Control";
             sampleControl.KeyDown += sampleControl_KeyDown;
@@ -65,7 +65,7 @@ namespace WinFormsApp1
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(Cyan.WindowWidth, Cyan.WindowHeight);
+            ClientSize = new Size(GameProperty.WindowWidth, GameProperty.WindowHeight);
             Controls.Add(button1);
             Controls.Add(sampleControl);
             Icon = (Icon)resources.GetObject("$this.Icon");

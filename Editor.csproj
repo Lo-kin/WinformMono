@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Content\bin\Windows\Content\*">
+    <Content Include="Content\bin\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Logo.ico" />
